@@ -98,6 +98,8 @@ def fetch_table_data(
         DataFrame read from table cache or from path
     """
 
+    tmp_label_column = "__labels_tmp"
+
     _lib = cudf if cudf else pd
     reader = reader or _lib.read_parquet
     load_cudf = cudf and reader == cudf.read_parquet
@@ -116,7 +118,7 @@ def fetch_table_data(
                 table_cache[path] = pa.Table.from_pandas(df)
                 cache_df = True
         if cats_only:
-            df.index.name = "labels"
+            df.index.name = tmp_label_column
             df.reset_index(drop=False, inplace=True)
         if cache_df:
             table_cache[path] = df.copy(deep=False)
@@ -130,7 +132,7 @@ def fetch_table_data(
         if columns is not None:
             df = df[columns]
         if cats_only:
-            df.index.name = "labels"
+            df.index.name = tmp_label_column
             df.reset_index(drop=False, inplace=True)
         return df
 
